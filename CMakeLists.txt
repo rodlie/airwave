@@ -55,7 +55,6 @@ set(CMAKE_MODULE_PATH
 # Configure the VST SDK path
 set(VST_VERSION 369_01_03_2018_build_132)
 set(VST_ZIP vstsdk${VST_VERSION}.zip)
-set(VSTZIP_PATH ${PROJECT_SOURCE_DIR}/${VST_ZIP})
 set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST_SDK/VST3_SDK)
 
 message(STATUS "VSTSDK_PATH is set to " ${VSTSDK_PATH})
@@ -65,10 +64,10 @@ find_file(VSTZIP_FILE NAMES ${VST_ZIP} PATHS "${PROJECT_SOURCE_DIR}")
 
 if(NOT VSTSDK_INCLUDE_DIR)
     if(NOT VSTZIP_FILE)
-        execute_process(COMMAND wget https://download.steinberg.net/sdk_downloads/${VST_ZIP})
+        execute_process(COMMAND wget https://download.steinberg.net/sdk_downloads/${VST_ZIP}  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
     endif()
     execute_process(COMMAND unzip ${VST_ZIP} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    execute_process(COMMAND sh copy_vst2_to_vst3_sdk.sh WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/VST_SDK)
+    execute_process(COMMAND sh copy_vst2_to_vst3_sdk.sh WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/VST_SDK")
 endif()
 
 find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
