@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QTreeWidget>
+#include <QDir>
 #include "common/config.h"
 #include "core/application.h"
 #include "core/logsocket.h"
@@ -30,6 +31,7 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 
 	QSettings settings;
 	QString vstPath = settings.value("vstPath", qgetenv("VST_PATH")).toString();
+    if (vstPath.isEmpty()) { vstPath = QDir::homePath()+"/.vst"; }
 	vstPathEdit_->setText(vstPath.split(':').first());
 
 	Storage* storage = qApp->storage();
@@ -188,7 +190,11 @@ void SettingsDialog::browseForBinariesPath()
 	dialog.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files);
 
 	QStringList nameFilters;
-	nameFilters << HOST_BASENAME "-32.exe" << HOST_BASENAME "-64.exe";
+#ifdef PLATFORM_64BIT
+    nameFilters << HOST_BASENAME "-64.exe";
+#else
+    nameFilters << HOST_BASENAME "-32.exe";
+#endif
 	nameFilters << PLUGIN_BASENAME ".so";
 	dialog.setNameFilters(nameFilters);
 

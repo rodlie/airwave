@@ -6,7 +6,7 @@ project(${PROJECT_NAME})
 # Project version
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 3)
-set(VERSION_PATCH 3)
+set(VERSION_PATCH 4)
 
 # Set plugin shared library base name
 set(PLUGIN_BASENAME ${PROJECT_NAME}-plugin)
@@ -53,17 +53,28 @@ set(CMAKE_MODULE_PATH
 )
 
 # Configure the VST SDK path
-set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST3\ SDK CACHE PATH
-	"Path to the Steinberg VST Audio Plugins SDK")
+set(VST_VERSION 369_01_03_2018_build_132)
+set(VST_ZIP vstsdk${VST_VERSION}.zip)
+set(VSTZIP_PATH ${PROJECT_SOURCE_DIR}/${VST_ZIP})
+set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST_SDK/VST3_SDK)
 
 message(STATUS "VSTSDK_PATH is set to " ${VSTSDK_PATH})
 
-find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h
-	PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
+find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
+find_file(VSTZIP_FILE NAMES ${VST_ZIP} PATHS "${PROJECT_SOURCE_DIR}")
 
 if(NOT VSTSDK_INCLUDE_DIR)
-	message(FATAL_ERROR "VST SDK is not found. You should set the VSTSDK_PATH variable "
-			"to the directory, where your copy of the VST SDK is located.")
+    if(NOT VSTZIP_FILE)
+        execute_process(COMMAND wget https://download.steinberg.net/sdk_downloads/${VST_ZIP})
+    endif()
+    execute_process(COMMAND unzip ${VST_ZIP} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+    execute_process(COMMAND sh copy_vst2_to_vst3_sdk.sh WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/VST_SDK)
+endif()
+
+find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
+
+if(NOT VSTSDK_INCLUDE_DIR)
+    message(FATAL_ERROR "VST SDK is not found. You should set the VSTSDK_PATH variable")
 endif()
 
 message(STATUS "VST SDK headers are found in ${VSTSDK_INCLUDE_DIR}")

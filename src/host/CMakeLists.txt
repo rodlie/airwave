@@ -39,42 +39,41 @@ set(SOURCES
 )
 
 if(NOT DISABLE_64BIT AND PLATFORM_64BIT)
-	# Set target
-	add_executable(${TARGET_NAME}-64 WIN32 ${SOURCES})
+    # Set target
+    add_executable(${TARGET_NAME}-64 WIN32 ${SOURCES})
 
-	set_target_properties(${TARGET_NAME}-64 PROPERTIES
-		COMPILE_FLAGS "-m64"
-		LINK_FLAGS "-m64"
-	)
+    set_target_properties(${TARGET_NAME}-64 PROPERTIES
+            COMPILE_FLAGS "-m64"
+            LINK_FLAGS "-m64"
+    )
 
-	# Link with libraries
-	target_link_libraries(${TARGET_NAME}-64
-		${CMAKE_THREAD_LIBS_INIT}
-	)
+    # Link with libraries
+    target_link_libraries(${TARGET_NAME}-64
+            ${CMAKE_THREAD_LIBS_INIT}
+    )
 
-	install(PROGRAMS
-		${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe
-		${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe.so
-		DESTINATION bin
-	)
+    install(PROGRAMS
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe.so
+            DESTINATION bin
+    )
+else()
+    # Set target
+    add_executable(${TARGET_NAME}-32 WIN32 ${SOURCES})
+
+    set_target_properties(${TARGET_NAME}-32 PROPERTIES
+            COMPILE_FLAGS "-m32"
+            LINK_FLAGS "-m32"
+    )
+
+    # Link with libraries
+    target_link_libraries(${TARGET_NAME}-32
+            ${CMAKE_THREAD_LIBS_INIT}
+    )
+
+    install(PROGRAMS
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-32.exe
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-32.exe.so
+            DESTINATION bin
+    )
 endif()
-
-
-# Set target
-add_executable(${TARGET_NAME}-32 WIN32 ${SOURCES})
-
-set_target_properties(${TARGET_NAME}-32 PROPERTIES
-	COMPILE_FLAGS "-m32"
-	LINK_FLAGS "-m32"
-)
-
-# Link with libraries
-target_link_libraries(${TARGET_NAME}-32
-	${CMAKE_THREAD_LIBS_INIT}
-)
-
-install(PROGRAMS
-	${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-32.exe
-	${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-32.exe.so
-	DESTINATION bin
-)

@@ -38,7 +38,11 @@ bool Storage::reload()
 
 	// Add default WINE loader
 	name = "default";
-	path = FileSystem::fullNameFromPath("wine");
+#ifdef PLATFORM_64BIT
+    path = FileSystem::fullNameFromPath("wine64");
+#elif
+    path = FileSystem::fullNameFromPath("wine");
+#endif
 	loaderByName_.emplace(makePair(name, path));
 
 	// Initialize default values
