@@ -1,10 +1,9 @@
-## About
-Airwave is a [wine](https://www.winehq.org/) based VST bridge, that allows for the use of Windows 32- and 64-bit VST 2.4 audio plugins with Linux VST hosts.
+## Airwave
+Airwave is a [wine](https://www.winehq.org/) based VST bridge, that allows for the use of Windows VST 2.4 audio plugins with Linux VST hosts.
 Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
 ## Requirements
-- wine, supporting XEMBED protocol (versions greater than 1.7.19 were tested,
-but earlier versions also may work). To solve the blank window issue you can apply [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch) to wine.
+- wine 2+
 - libmagic
 - Qt5 for the airwave manager application (GUI)
 
@@ -20,26 +19,20 @@ but earlier versions also may work). To solve the blank window issue you can app
     sudo yum -y install gcc-c++ git cmake wine wine-devel wine-devel.i686 file file-devel libX11-devel libX11-devel.i686 qt5-devel glibc-devel.i686 glibc-devel
     ```
 
-  * **Ubuntu 14.04 (x86_64)** example:
+  * **Ubuntu 18.04 (x86_64)** example:
     ```
-    sudo apt-get install git cmake gcc-multilib g++-multilib libx11-dev libx11-dev:i386 qt5-default libmagic-dev
-    sudo add-apt-repository ppa:ubuntu-wine/ppa
-    sudo apt-get update
-    sudo apt-get install wine1.7 wine1.7-dev
+    sudo apt-get install git cmake build-essential qt5-qmake qtbase5-dev libmagic-dev wine64-*
     ```
-2. Get the VST Audio Plugins SDK [from Steinberg](http://www.steinberg.net/en/company/developers.html). I cannot distribute it myself due to the license restrictions.
-
-3. Unpack the VST SDK archive. Further I'll assume that you have unpacked it in your home directory: ${HOME}/VST3\ SDK.
-
-4. Clone the airwave GIT repository
+    
+2. Clone the airwave GIT repository
   ```
-  git clone https://github.com/phantom-code/airwave.git
+  git clone https://github.com/rodlie/airwave.git
   ```
 
 5. Go to the airwave source directory and execute the following commands:
   ```
   mkdir build && cd build
-  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave -DVSTSDK_PATH=${HOME}/VST3\ SDK ..
+  cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave ..
   make
   sudo make install
   ```
@@ -68,6 +61,7 @@ The bridge consists of four components:
 When the airwave-plugin is loaded by the VST host, it obtains its absolute path and use it as the key to get the linked VST DLL from the configuration. Then it starts the airwave-host process and passes the path to the linked VST file. The airwave-host loads the VST DLL and works as a fake VST host. Starting from this point, the airwave-plugin and airwave-host act together like a proxy, translating commands between the native VST host and the Windows VST plugin.
 
 ## Known issues
+- Some fonts may be missing in various plugins.
 - Due to a bug in wine, there is some hacking involved when embedding the editor window. There is a chance that you get a black window instead of the plugin GUI. Also some areas might not update correctly when increasing the window size. You can workaround this issue by patching wine with [this patch](https://github.com/phantom-code/airwave/blob/develop/fix-xembed-wine-windows.patch).
 
 ## Compatibility
@@ -91,6 +85,11 @@ If you will get success with another version, please contact me and I will updat
  Green Oak Software Crystal | yes |
  Image-Line Harmless | yes |
  Image-Line Sytrus | yes |
+ Image-Line Drummaxx | yes |
+ Image-Line Morphine | yes |
+ Image-Line PoiZone | yes |
+ Image-Line Sakura | yes |
+ Image-Line Toxic Biohazard | yes |
  LennarDigital Sylenth1 | yes | you need to override d2d1.dll in winecfg
  LePou Plugins | yes | LeCab2 has slight GUI redrawing issues
  NI Absynth | yes |
