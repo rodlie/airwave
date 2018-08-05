@@ -4,6 +4,7 @@ set(TARGET_NAME ${HOST_BASENAME})
 project(${TARGET_NAME})
 
 option(DISABLE_64BIT  "Disable building of the 64-bit host endpoint" OFF)
+option(DISABLE_32BIT  "Disable building of the 32-bit host endpoint" OFF)
 
 find_package(Threads REQUIRED)
 
@@ -57,7 +58,8 @@ if(NOT DISABLE_64BIT AND PLATFORM_64BIT)
             ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-64.exe.so
             DESTINATION bin
     )
-else()
+endif()
+if(NOT DISABLE_32BIT)
     # Set target
     add_executable(${TARGET_NAME}-32 WIN32 ${SOURCES})
 
