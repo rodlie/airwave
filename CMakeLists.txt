@@ -53,30 +53,16 @@ set(CMAKE_MODULE_PATH
 )
 
 # Configure the VST SDK path
-set(VST_VERSION 369_01_03_2018_build_132)
-set(VST_ZIP vstsdk${VST_VERSION}.zip)
-set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST_SDK/VST3_SDK)
+set(VSTSDK_PATH ${PROJECT_SOURCE_DIR}/VST2)
 
-message(STATUS "VSTSDK_PATH is set to " ${VSTSDK_PATH})
+#message(STATUS "VSTSDK_PATH is set to " ${VSTSDK_PATH})
 
-find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
-find_file(VSTZIP_FILE NAMES ${VST_ZIP} PATHS "${PROJECT_SOURCE_DIR}")
-
+find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/")
 if(NOT VSTSDK_INCLUDE_DIR)
-    if(NOT VSTZIP_FILE)
-        execute_process(COMMAND wget https://download.steinberg.net/sdk_downloads/${VST_ZIP}  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    endif()
-    execute_process(COMMAND unzip ${VST_ZIP} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    execute_process(COMMAND sh copy_vst2_to_vst3_sdk.sh WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/VST_SDK")
+    message(FATAL_ERROR "VST2 SDK not found. Download the VST2 SDK and copy aeffect.h and aeffectx.h to ${VSTSDK_PATH}. Note that the VST2 SDK is not supported by Steinberg anymore, this means you will need to search randomly on the internet for the VST2 SDK and copy the header files to ${VSTSDK_PATH}. The last known version to include the VST2 SDK is 'vstsdk369_01_03_2018_build_132.zip' with the following SHA256 checksum: 7c6c2a5f0bcbf8a7a0d6a42b782f0d3c00ec8eafa4226bbf2f5554e8cd764964.")
 endif()
 
-find_path(VSTSDK_INCLUDE_DIR NAMES aeffect.h aeffectx.h PATHS "${VSTSDK_PATH}/pluginterfaces/vst2.x/")
-
-if(NOT VSTSDK_INCLUDE_DIR)
-    message(FATAL_ERROR "VST SDK is not found. You should set the VSTSDK_PATH variable")
-endif()
-
-message(STATUS "VST SDK headers are found in ${VSTSDK_INCLUDE_DIR}")
+message(STATUS "VST2 SDK headers are found in ${VSTSDK_INCLUDE_DIR}")
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}/src
