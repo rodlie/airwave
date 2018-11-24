@@ -6,6 +6,7 @@ Due to the use of shared memory, only one extra copying is made for each data tr
 - wine 2+
 - libmagic
 - Qt5 for the airwave manager application (GUI)
+- Steinberg VST2 SDK header files
 
 ## Building the source
 1. Install the required packages: multilib-enabled GCC, cmake, git, wine, Qt5, libmagic.
@@ -23,13 +24,17 @@ Due to the use of shared memory, only one extra copying is made for each data tr
     ```
     sudo apt-get install git cmake build-essential qt5-qmake qtbase5-dev libmagic-dev wine64-*
     ```
-    
+  * **Slackware** example:
+  
+    Build Wine from SlackBuilds with 32-bit+64-bit support.
+
 2. Clone the airwave GIT repository
   ```
   git clone https://github.com/rodlie/airwave.git
   ```
+**NOTE!**: Copy the VST2 SDK headers files to the VST2 folder in the airwave source folder (create the VST2 folder if it does not exists) before building.
 
-5. Go to the airwave source directory and execute the following commands:
+3. Go to the airwave source directory and execute the following commands:
   ```
   mkdir build && cd build
   cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave ..
