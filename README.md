@@ -3,13 +3,13 @@ Airwave is a [wine](https://www.winehq.org/) based VST bridge, that allows for t
 Due to the use of shared memory, only one extra copying is made for each data transfer. Airwave also uses the XEMBED protocol to correctly embed the plugin editor into the host window.
 
 ## Requirements
-- wine 2+
+- gcc multilib
+- wine (32-bit and 64-bit)
 - libmagic
-- Qt5 for the airwave manager application (GUI)
+- Qt5(base) for the GUI
 - Steinberg VST2 SDK header files
 
-## Building the source
-1. Install the required packages: multilib-enabled GCC, cmake, git, wine, Qt5, libmagic.
+Packages:
   * **Arch Linux (x86_64)** example:
     ```
     sudo pacman -S gcc-multilib cmake git wine qt5-base
@@ -24,25 +24,21 @@ Due to the use of shared memory, only one extra copying is made for each data tr
     ```
     sudo apt-get install git cmake build-essential qt5-qmake qtbase5-dev libmagic-dev wine64-*
     ```
-  * **Slackware** example:
-  
-    Build Wine from SlackBuilds with 32-bit+64-bit support.
 
-2. Clone the airwave GIT repository
+## Building
+
   ```
   git clone https://github.com/rodlie/airwave.git
-  ```
-**NOTE!**: Copy the VST2 SDK headers files to the VST2 folder in the airwave source folder (create the VST2 folder if it does not exists) before building.
-
-3. Go to the airwave source directory and execute the following commands:
-  ```
+  cd airwave
+  mkdir VST2
+  cp /path_where_VST2_SDK_is_located/*.h VST2/
   mkdir build && cd build
   cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=/opt/airwave ..
   make
   sudo make install
   ```
 
-Of course, you can change the CMAKE_INSTALL_PREFIX as you like.
+Of course, you can change the ``CMAKE_INSTALL_PREFIX`` as you like. Note that airwave will try to build for 32-bit and 64-bit as default, if you don't have a multilib installation add `-DDISABLE_32BIT=ON`. 
 
 ## Usage
 1. Run the airwave-manager
