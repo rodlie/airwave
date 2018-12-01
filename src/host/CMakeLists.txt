@@ -65,7 +65,7 @@ if(NOT DISABLE_32BIT)
 
     set_target_properties(${TARGET_NAME}-32 PROPERTIES
             COMPILE_FLAGS "-m32"
-            LINK_FLAGS "-m32"
+            LINK_FLAGS "-m32 -L /usr/lib/i386-linux-gnu/wine"
     )
 
     # Link with libraries
