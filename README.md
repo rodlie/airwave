@@ -22,7 +22,7 @@ Packages:
 
   * **Ubuntu 18.04 (x86_64)** example:
     ```
-    sudo apt-get install git cmake build-essential qt5-qmake qtbase5-dev libmagic-dev wine64-*
+    sudo apt-get install git cmake build-essential qt5-qmake qtbase5-dev libmagic-dev wine libwine-dev libwine-dev:i386
     ```
 
 ## Building
