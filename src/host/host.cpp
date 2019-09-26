@@ -4,6 +4,7 @@
 #include "common/logger.h"
 #include "common/protocol.h"
 
+#include <X11/Xlib.h>
 
 namespace Airwave {
 
@@ -225,10 +226,14 @@ std::string Host::errorString() const
 void Host::destroyEditorWindow()
 {
 	if(hwnd_) {
+		Display *display = XOpenDisplay(0);
 		KillTimer(hwnd_, timerId_);
+		XSync(display, true);
 		DestroyWindow(hwnd_);
 		UnregisterClass(kWindowClass, GetModuleHandle(nullptr));
 		hwnd_ = 0;
+		XSync(display, true);
+		XCloseDisplay(display);
 	}
 }
 

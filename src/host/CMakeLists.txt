@@ -51,6 +51,7 @@ if(NOT DISABLE_64BIT AND PLATFORM_64BIT)
     # Link with libraries
     target_link_libraries(${TARGET_NAME}-64
             ${CMAKE_THREAD_LIBS_INIT}
+            ${X11_X11_LIB}            
     )
 
     install(PROGRAMS
@@ -71,7 +72,8 @@ if(NOT DISABLE_32BIT)
     # Link with libraries
     target_link_libraries(${TARGET_NAME}-32
             ${CMAKE_THREAD_LIBS_INIT}
-    )
+            ${X11_X11_LIB}
+    )    
 
     install(PROGRAMS
             ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-32.exe
