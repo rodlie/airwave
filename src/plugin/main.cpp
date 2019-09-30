@@ -19,7 +19,7 @@ AEffect* mainStub(AudioMasterProc audioMasterProc) asm ("main");
 
 }
 
-
+/* for now this is not needed.
 void signalHandler(int signum)
 {
 	if(signum == SIGCHLD) {
@@ -29,7 +29,7 @@ void signalHandler(int signum)
 		TRACE("Received signal %d", signum);
 	}
 }
-
+*/
 
 AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 {
