@@ -33,9 +33,19 @@ void signalHandler(int signum)
 
 AEffect* VSTPluginMain(AudioMasterProc audioMasterProc)
 {
-	// FIXME Without this signal handler the Renoise tracker is unable to start the child
-	// winelib application.
-	signal(SIGCHLD, signalHandler);
+    /*  // FIXME Without this signal handler the Renoise tracker is unable to start the child
+        // winelib application.
+
+     This signal handler can cause issues if multiple airwave plugins are loaded since it
+     assigns an handler for the hole process. If the plugin is unloaded it should reassign
+     the handler otherwise the other plugins will crash.
+
+     For now this handler should be comment out. I've tested this with Renoise 3.2.0 and
+     this signal handler is not needed.
+
+        //signal(SIGCHLD, signalHandler);
+    */
+
 
 	Storage storage;
 	loggerInit(storage.logSocketPath(), PLUGIN_BASENAME);
