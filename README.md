@@ -78,12 +78,14 @@ If you will get success with another version, please contact me and I will updat
  AlgoMusic CZynthia | yes |
  Aly James LAB OB-Xtreme | yes |
  Analogic Delay by interrruptor | yes |
+ Audio Damage Dubstation 2 | yes |
  Bionic Delay by interrruptor | yes |
  Blue Cat Audio Oscilloscope Multi | no | doesn't work with wine
-  Cableguys Volume Shaper | yes | you need to install native d2d1.dll and override it in winecfg
+ Cableguys Volume Shaper | yes | you need to install native d2d1.dll and override it in winecfg
  Credland Audio BigKick | yes | you need to install native d2d1.dll and override it in winecfg
  FabFilter plugins | yes | haven't tested them all
  Green Oak Software Crystal | yes |
+ IK Multimedia Amplitude 4 | yes |
  Image-Line Harmless | yes |
  Image-Line Sytrus | yes |
  Image-Line Drummaxx | yes |
@@ -124,5 +126,6 @@ If you will get success with another version, please contact me and I will updat
  u-he plugins | yes | Linux version is also available
  Variety of Sound plugins | yes |
  Voxengo plugins | mostly | inter plugin routing doesn't work (architecture issue)
+ Valhalla VintageVerb | yes |
  Xfer Serum | yes | install native GDI+ (run `winetricks gdiplus`)
  EZDrummer2, BFD3, XLN AD2 | yes | host need multi-channel support
