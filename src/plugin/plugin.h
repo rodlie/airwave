@@ -11,7 +11,7 @@
 #include "common/event.h"
 #include "common/vst24.h"
 #include "common/vsteventkeeper.h"
-
+#include "common/framequeue.h"
 
 namespace Airwave {
 
@@ -47,6 +47,8 @@ private:
 	DataPort callbackPort_;
 	DataPort audioPort_;
 
+	FrameQueue audioCallback_;
+
 	Event condition_;
 
 	int childPid_;
@@ -68,7 +70,7 @@ private:
 
 	intptr_t setBlockSize(DataPort* port, intptr_t frames);
 
-	intptr_t handleAudioMaster();
+	intptr_t handleAudioMaster(DataFrame *frame);
 
 	intptr_t dispatch(DataPort* port, i32 opcode, i32 index, intptr_t value, void* ptr,
 			float opt);

@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 #include "common/logger.h"
 #include "common/protocol.h"
-
+#include "common/framequeue.h"
 
 #define XEMBED_EMBEDDED_NOTIFY	0
 #define XEMBED_FOCUS_OUT		5
@@ -39,7 +39,7 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 	}
 
 	// FIXME: frame size should be verified.
-	if(!callbackPort_.create(1024)) {
+	if(!callbackPort_.create(FrameQueue::CALLBACK_FRAMESIZE)) {
 		ERROR("Unable to create callback port");
 		controlPort_.disconnect();
 		return;
@@ -94,6 +94,10 @@ Plugin::Plugin(const std::string& vstPath, const std::string& hostPath,
 		childPid_ = -1;
 		return;
 	}
+
+	// Asynchronous audio callback processor, we use the same memory IPC ID since we know
+	// it is unique on the system.
+	audioCallback_.connect(controlPort_.id());
 
 	PluginInfo* info = reinterpret_cast<PluginInfo*>(frame->data);
 	effect_ = new AEffect;
@@ -167,7 +171,7 @@ void Plugin::callbackThread()
 	while(processCallbacks_.test_and_set()) {
 		if(callbackPort_.waitRequest("Plugin::callbackThread", 100)) {
 			DataFrame* frame = callbackPort_.frame<DataFrame>();
-			frame->value = handleAudioMaster();
+			frame->value = handleAudioMaster(frame);
 			callbackPort_.sendResponse();
 		}
 	}
@@ -203,10 +207,8 @@ intptr_t Plugin::setBlockSize(DataPort* port, intptr_t frames)
 }
 
 
-intptr_t Plugin::handleAudioMaster()
+intptr_t Plugin::handleAudioMaster(DataFrame *frame)
 {
-	DataFrame* frame = callbackPort_.frame<DataFrame>();
-
 	if(frame->opcode != audioMasterGetTime && frame->opcode != audioMasterIdle) {
 		FLOOD("(%p) handleAudioMaster(opcode: %s, index: %d, value: %d, opt: %g)",
 				std::this_thread::get_id(), kAudioMasterEvents[frame->opcode],
@@ -714,6 +716,12 @@ void Plugin::processReplacing(float** inputs, float** outputs, i32 count)
 	audioPort_.sendRequest();
 	audioPort_.waitResponse("Plugin::processReplacing");
 
+	u8 callbackData[FrameQueue::CALLBACK_FRAMESIZE];
+	while ( audioCallback_.popFrame((DataFrame *) &callbackData) ) {
+		DEBUG("Processing async audioMaster call from audio thread");
+		handleAudioMaster((DataFrame *) &callbackData);
+	}
+
 	data = reinterpret_cast<float*>(frame->data);
 
 	for(int i = 0; i < effect_->numOutputs; ++i) {
@@ -735,6 +743,12 @@ void Plugin::processDoubleReplacing(double** inputs, double** outputs, i32 count
 
 	audioPort_.sendRequest();
 	audioPort_.waitResponse("Plugin::processDoubleReplacing");
+
+	u8 callbackData[FrameQueue::CALLBACK_FRAMESIZE];
+	while ( audioCallback_.popFrame((DataFrame *) &callbackData) ) {
+		DEBUG("Processing async audioMaster call from audio thread");
+		handleAudioMaster((DataFrame *) &callbackData);
+	}
 
 	data = reinterpret_cast<double*>(frame->data);
 

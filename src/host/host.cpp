@@ -20,7 +20,8 @@ Host::Host() :
 	runAudio_(ATOMIC_FLAG_INIT),
 	isEditorOpen_(false),
 	oldWndProc_(nullptr),
-	childHwnd_(0)
+	childHwnd_(0),
+	audiotid_(0)
 {
 	DEBUG("Main thread id: %p", GetCurrentThreadId());
 }
@@ -91,6 +92,10 @@ bool Host::initialize(const char* fileName, int portId)
 		FreeLibrary(module_);
 		return false;
 	}
+
+	// Asynchronous audio callback processor, we use the same memory IPC ID since we know
+	// it is unique on the system.
+	audioCallback_.connect(portId);
 
 	TRACE("Request from plugin endpoint received, sending response");
 
@@ -241,6 +246,7 @@ void Host::destroyEditorWindow()
 void Host::audioThread()
 {
 	condition_.post();
+    audiotid_ = GetCurrentThreadId();
 
 	while(runAudio_.test_and_set()) {
 		if(audioPort_.waitRequest("Host::audioThread", 100)) {
@@ -679,8 +685,16 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		for(int i = 0; i < events->numEvents; ++i)
 			event[i] = *events->events[i];
 
-		callbackPort_.sendRequest();
-		callbackPort_.waitResponse("Host::audioMaster/audioMasterProcessEvents");
+		// audioMasterProcessEvents are known to deadlock on certain VST Host if it doesn't come
+		// from the audio thread. To avoid thread context switching, we simply send plugin VST 
+		// event asynchronously using the audioCallback that will process the event in the 
+		// audio thread of the VST Host.
+		if ( audiotid_ == GetCurrentThreadId() ) {
+			audioCallback_.pushFrame(frame);
+		} else {
+			callbackPort_.sendRequest();
+			callbackPort_.waitResponse("Host::audioMaster/audioMasterProcessEvents");
+		}
 		return frame->value; }
 	}
 

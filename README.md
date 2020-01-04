@@ -84,6 +84,7 @@ If you will get success with another version, please contact me and I will updat
  Cableguys Volume Shaper | yes | you need to install native d2d1.dll and override it in winecfg
  Credland Audio BigKick | yes | you need to install native d2d1.dll and override it in winecfg
  FabFilter plugins | yes | haven't tested them all
+ GForce impOSCar2 | yes |
  Green Oak Software Crystal | yes |
  IK Multimedia Amplitude 4 | yes |
  Image-Line Harmless | yes |
@@ -120,6 +121,7 @@ If you will get success with another version, please contact me and I will updat
  SuperWave P8 | yes |
  Synapse Audio DUNE 2 | yes |
  Synth1 by Ichiro Toda | yes |
+ TAL TAL-U-NO-LX | yes |
  Tone2 FireBird | yes |
  Tone2 Nemesis | yes |
  Tone2 Saurus | yes |
