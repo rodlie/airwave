@@ -21,6 +21,9 @@ set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_C_COMPILER winegcc)
 set(CMAKE_CXX_COMPILER wineg++)
 
+# Debug code should contain Windows symbol on the Wine side...
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -gstabs")
+
 add_definitions(-DNOMINMAX)
 
 if(DEBUG_BINARY_DIR)
