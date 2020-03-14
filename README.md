@@ -52,6 +52,14 @@ Of course, you can change the ``CMAKE_INSTALL_PREFIX`` as you like. Note that ai
 
 **Note:** After you have created the link you cannot move/rename it with a file manager. All updates have to be done inside the airwave-manager. Also, you should update your links after updating the airwave itself. This could be achived by pressing the "Update links" button.
 
+## Wine compabilities issues
+If the plugin cannot be scan by your host, it is possible to use the ```airwave-tester``` and pass WINEDEBUG flags to have a better idea what is the issue with the plugin.
+
+```
+export WINEDEBUG=fixme-all,warn+all
+/opt/airwave/bin/airwave-tester '~/.vst/DUNE 3.so'
+```
+
 ## Under the hood
 The bridge consists of four components:
 - Plugin endpoint (airwave-plugin.so)

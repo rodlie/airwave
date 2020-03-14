@@ -72,3 +72,4 @@ include_directories(
 add_subdirectory(src/plugin)
 add_subdirectory(src/host)
 add_subdirectory(src/manager)
+add_subdirectory(src/tester)
