@@ -140,7 +140,7 @@ struct AirwaveTester {
 	}
 
 	intptr_t handleAudioMaster(DataFrame *frame) {
-		printf("Plugin called API: handleAudioMaster -");
+		printf("Plugin called API: handleAudioMaster - ");
 		switch(frame->opcode) {
 		case audioMasterVersion:
 			printf("audioMasterVersion\n");
