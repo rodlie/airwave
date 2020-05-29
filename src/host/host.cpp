@@ -4,6 +4,7 @@
 #include "common/logger.h"
 #include "common/protocol.h"
 
+#include <X11/Xlib.h>
 
 namespace Airwave {
 
@@ -19,7 +20,8 @@ Host::Host() :
 	runAudio_(ATOMIC_FLAG_INIT),
 	isEditorOpen_(false),
 	oldWndProc_(nullptr),
-	childHwnd_(0)
+	childHwnd_(0),
+	audiotid_(0)
 {
 	DEBUG("Main thread id: %p", GetCurrentThreadId());
 }
@@ -83,13 +85,17 @@ bool Host::initialize(const char* fileName, int portId)
 
 	TRACE("Waiting for plugin endpoint request...");
 
-	if(!controlPort_.waitRequest()) {
+	if(!controlPort_.waitRequest("endpoint init")) {
 		ERROR("Unable to get initial request from plugin endpoint");
 		controlPort_.disconnect();
 		DeleteCriticalSection(&cs_);
 		FreeLibrary(module_);
 		return false;
 	}
+
+	// Asynchronous audio callback processor, we use the same memory IPC ID since we know
+	// it is unique on the system.
+	audioCallback_.connect(portId);
 
 	TRACE("Request from plugin endpoint received, sending response");
 
@@ -159,7 +165,7 @@ bool Host::processRequest()
 		return false;
 	}
 
-	if(!controlPort_.waitRequest(10))
+	if(!controlPort_.waitRequest("host::processRequest", 10))
 		return true;
 
 	bool result = true;
@@ -225,10 +231,14 @@ std::string Host::errorString() const
 void Host::destroyEditorWindow()
 {
 	if(hwnd_) {
+		Display *display = XOpenDisplay(0);
 		KillTimer(hwnd_, timerId_);
+		XSync(display, true);
 		DestroyWindow(hwnd_);
 		UnregisterClass(kWindowClass, GetModuleHandle(nullptr));
 		hwnd_ = 0;
+		XSync(display, true);
+		XCloseDisplay(display);
 	}
 }
 
@@ -236,9 +246,10 @@ void Host::destroyEditorWindow()
 void Host::audioThread()
 {
 	condition_.post();
+    audiotid_ = GetCurrentThreadId();
 
 	while(runAudio_.test_and_set()) {
-		if(audioPort_.waitRequest(100)) {
+		if(audioPort_.waitRequest("Host::audioThread", 100)) {
 			DataFrame* frame = audioPort_.frame<DataFrame>();
 
 			if(frame->command == Command::ProcessSingle) {
@@ -578,7 +589,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 	case audioMasterCurrentId:
 	case audioMasterGetSampleRate:
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterGetSampleRate");
 		return frame->value;
 
 	case audioMasterIOChanged: {
@@ -596,7 +607,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		info->version      = effect_->version;
 
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterIOChanged");
 		return frame->value; }
 
 	// FIXME Passing the audioMasterUpdateDisplay request to the plugin endpoint leads to
@@ -618,7 +629,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 
 	case audioMasterGetVendorString: {
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterGetVendorString");
 
 		if(!frame->value)
 			return 0;
@@ -632,7 +643,7 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 
 	case audioMasterGetProductString: {
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterGetProductString");
 
 		if(!frame->value)
 			return 0;
@@ -653,12 +664,12 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		dest[maxLength-1] = '\0';
 
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterCanDo");
 		return frame->value; }
 
 	case audioMasterGetTime:
 		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		callbackPort_.waitResponse("Host::audioMaster/audioMasterGetTime");
 
 		if(!frame->value)
 			return 0;
@@ -674,8 +685,16 @@ intptr_t Host::audioMaster(i32 opcode, i32 index, intptr_t value, void* ptr, flo
 		for(int i = 0; i < events->numEvents; ++i)
 			event[i] = *events->events[i];
 
-		callbackPort_.sendRequest();
-		callbackPort_.waitResponse();
+		// audioMasterProcessEvents are known to deadlock on certain VST Host if it doesn't come
+		// from the audio thread. To avoid thread context switching, we simply send plugin VST 
+		// event asynchronously using the audioCallback that will process the event in the 
+		// audio thread of the VST Host.
+		if ( audiotid_ == GetCurrentThreadId() ) {
+			audioCallback_.pushFrame(frame);
+		} else {
+			callbackPort_.sendRequest();
+			callbackPort_.waitResponse("Host::audioMaster/audioMasterProcessEvents");
+		}
 		return frame->value; }
 	}
 

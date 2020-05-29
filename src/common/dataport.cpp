@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include "common/logger.h"
 
-
 namespace Airwave {
 
 
@@ -15,6 +14,7 @@ DataPort::DataPort() :
 	frameSize_(0),
 	buffer_(nullptr)
 {
+	wait_softlimit = 30000;
 }
 
 
@@ -152,15 +152,35 @@ void DataPort::sendResponse()
 }
 
 
-bool DataPort::waitRequest(int msecs)
+bool DataPort::waitRequest(const char *debugObject, int msecs)
 {
-	return controlBlock()->request.wait(msecs);
+	if ( msecs == -1 ) 
+	{
+		if ( !controlBlock()->request.wait(wait_softlimit) ) 
+		{
+			ERROR("waitRequest FAILED for %s", debugObject);
+			return false;
+		}
+		return true;
+	} else {
+		return controlBlock()->request.wait(msecs);
+	}
 }
 
 
-bool DataPort::waitResponse(int msecs)
+bool DataPort::waitResponse(const char *debugObject, int msecs)
 {
-	return controlBlock()->response.wait(msecs);
+	if ( msecs == -1 ) 
+	{
+		if ( !controlBlock()->response.wait(wait_softlimit) ) 
+		{
+			ERROR("waitResponse FAILED for %s", debugObject);
+			return false;
+		}
+		return true;
+	} else {
+		return controlBlock()->response.wait(msecs);
+	}
 }
 
 

@@ -8,12 +8,12 @@
 using namespace Airwave;
 
 
-int main(int argc, const char* argv[])
+int __cdecl main(int argc, const char* argv[])
 {
 	if(argc != 5) {
-		fprintf(stderr, "Airwave host endpoint, version " VERSION_STRING);
-		fprintf(stderr, "error: wrong number of arguments: %d", argc);
-		fprintf(stderr, "usage: %s <vst path> <port id> <log level> <log socket path>",
+		fprintf(stderr, "Airwave host endpoint, version " VERSION_STRING "\n");
+		fprintf(stderr, "error: wrong number of arguments: %d\n", argc);
+		fprintf(stderr, "usage: %s <vst path> <port id> <log level> <log socket path>\n",
 				argv[0]);
 
 		loggerFree();

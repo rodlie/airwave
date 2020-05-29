@@ -30,8 +30,8 @@ public:
 	void sendRequest();
 	void sendResponse();
 
-	bool waitRequest(int msecs = -1);
-	bool waitResponse(int msecs = -1);
+	bool waitRequest(const char *debugObject, int msecs = -1);
+	bool waitResponse(const char *debugObject, int msecs = -1);
 
 private:
 	struct ControlBlock {
@@ -44,6 +44,10 @@ private:
 	void* buffer_;
 
 	ControlBlock* controlBlock();
+
+	// if the waitRequest or waitResponse is asking for -1; we impose a soft limit to avoid host lock on 
+	// dsp thread
+	int wait_softlimit;
 };
 
 

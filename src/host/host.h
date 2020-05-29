@@ -10,7 +10,7 @@
 #include "common/event.h"
 #include "common/vst24.h"
 #include "common/vsteventkeeper.h"
-
+#include "common/framequeue.h"
 
 namespace Airwave {
 
@@ -43,6 +43,9 @@ private:
 	DataPort controlPort_;
 	DataPort callbackPort_;
 	DataPort audioPort_;
+
+    i64 audiotid_;
+	FrameQueue audioCallback_;
 
 	Event condition_;
 
